@@ -1,0 +1,23 @@
+{
+  "expo": {
+    "name": "Nal AI Trader",
+    "slug": "NaIAITrader",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#000000"
+    "android": {
+     "usesCleartextTraffic": true
+}
+      "package": "com.husnal85.NaIAITrader",
+      "versionCode": 1
+    },
+    "extra": {
+      "apiUrl": "https://ai-trader-gk3f.onrender.com"
+    }
+  }
+}
