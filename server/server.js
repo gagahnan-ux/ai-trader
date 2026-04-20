@@ -1,28 +1,35 @@
-// ===============================
-// AI BRAIN PRO SERVER (FINAL)
-// ===============================
+// =====================================
+// AI SCALPER PRO - FINAL SERVER
+// =====================================
 const express = require("express");
 const bodyParser = require("body-parser");
 
 const app = express();
 app.use(bodyParser.json());
 
+// =============================
+// STORE DATA FROM EA
+// =============================
 let marketData = {};
+let stats = {
+  win: 0,
+  loss: 0
+};
 
-// ===============================
+// =============================
 // RECEIVE DATA FROM EA
-// ===============================
+// =============================
 app.post("/data", (req, res) => {
   marketData = req.body;
 
-  console.log("DATA:", marketData);
+  console.log("📊 DATA:", marketData);
 
   res.json({ status: "ok" });
 });
 
-// ===============================
-// AI BRAIN FUNCTION
-// ===============================
+// =============================
+// AI CORE LOGIC (IMPROVED)
+// =============================
 function getSignal() {
   if (!marketData.price) {
     return {
@@ -36,108 +43,119 @@ function getSignal() {
 
   let rsi = marketData.rsi || 50;
   let spread = marketData.spread || 10;
-  let price = marketData.price || 0;
 
-  // ===============================
-  // TREND DETECTION (simple)
-  // ===============================
-  let trend = "RANGE";
-
-  if (rsi > 55) trend = "UP";
-  if (rsi < 45) trend = "DOWN";
-
-  // ===============================
-  // SIGNAL LOGIC
-  // ===============================
   let signal = "HOLD";
   let confidence = 0.5;
 
-  // BUY CONDITION
-  if (rsi < 30 && trend !== "DOWN") {
-    signal = "BUY";
-    confidence = 0.75;
-  }
+  // =========================
+  // CORE STRATEGY (ACTIVE)
+  // =========================
 
-  // SELL CONDITION
-  if (rsi > 70 && trend !== "UP") {
-    signal = "SELL";
-    confidence = 0.75;
-  }
-
-  // TREND FOLLOW
-  if (trend === "UP" && rsi > 50 && rsi < 65) {
+  // NORMAL ENTRY
+  if (rsi < 35) {
     signal = "BUY";
     confidence = 0.65;
   }
 
-  if (trend === "DOWN" && rsi < 50 && rsi > 35) {
+  else if (rsi > 65) {
     signal = "SELL";
     confidence = 0.65;
   }
 
-  // ===============================
-  // SPREAD FILTER
-  // ===============================
-  if (spread > 30) {
+  // STRONG ENTRY
+  if (rsi < 25) {
+    signal = "BUY";
+    confidence = 0.8;
+  }
+
+  if (rsi > 75) {
+    signal = "SELL";
+    confidence = 0.8;
+  }
+
+  // =========================
+  // SPREAD FILTER (RELAXED)
+  // =========================
+  if (spread > 50) {
     signal = "HOLD";
     confidence = 0;
   }
 
-  // ===============================
-  // VOLATILITY (fake simple)
-  // ===============================
+  // =========================
+  // ADAPTIVE SL TP
+  // =========================
   let sl = 120;
   let tp = 90;
 
-  if (spread < 15) {
-    sl = 100;
-    tp = 80;
+  if (confidence > 0.75) {
+    sl = 150;
+    tp = 120;
   }
 
-  // ===============================
+  // =========================
   // MODE SYSTEM
-  // ===============================
+  // =========================
   let mode = "SAFE";
 
-  if (confidence > 0.7) mode = "SCALP";
-  if (confidence > 0.8) mode = "KILL";
+  if (confidence >= 0.6) mode = "SCALP";
+  if (confidence >= 0.8) mode = "KILL";
+
+  // =========================
+  // LEARNING EFFECT (SIMPLE)
+  // =========================
+  let winRate = stats.win / Math.max(1, (stats.win + stats.loss));
+
+  if (winRate < 0.4) {
+    confidence *= 0.8; // defensive mode
+  }
+
+  if (winRate > 0.7) {
+    confidence *= 1.1; // aggressive boost
+  }
 
   return {
     signal,
-    confidence,
+    confidence: parseFloat(confidence.toFixed(2)),
     sl,
     tp,
-    mode,
-    trend
+    mode
   };
 }
 
-// ===============================
+// =============================
 // SEND SIGNAL TO EA
-// ===============================
+// =============================
 app.get("/signal", (req, res) => {
   const ai = getSignal();
 
-  console.log("AI:", ai);
+  console.log("🤖 AI:", ai);
 
   res.json(ai);
 });
 
-// ===============================
-// LEARNING HOOK (future AI)
-// ===============================
+// =============================
+// LEARNING FEEDBACK FROM EA
+// =============================
 app.post("/result", (req, res) => {
-  console.log("RESULT:", req.body);
+  const profit = req.body.profit || 0;
+
+  if (profit > 0) stats.win++;
+  else stats.loss++;
+
+  console.log("📈 RESULT:", profit, " | Stats:", stats);
+
   res.json({ status: "learned" });
 });
 
-// ===============================
+// =============================
+// SERVER STATUS
+// =============================
 app.get("/", (req, res) => {
-  res.send("AI BRAIN RUNNING 🚀");
+  res.send("AI SCALPER PRO RUNNING 🚀");
 });
 
-// ===============================
+// =============================
 const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
-  console.log("AI SERVER RUNNING ON PORT", PORT);
+  console.log("🔥 AI SERVER RUNNING ON PORT", PORT);
 });
